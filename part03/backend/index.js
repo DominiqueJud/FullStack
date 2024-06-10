@@ -2,6 +2,7 @@ const express=require("express")
 const app=express()
 const morgan=require("morgan")
 app.use(express.json())
+app.use(express.static("dist"))
 
 
 morgan.token("reqData",(req,res)=>{
@@ -111,6 +112,6 @@ const unknownEndpoint=(request, response)=>{
 
 app.use(unknownEndpoint)
 
-const PORT= 3001 
+const PORT= process.env.PORT||3001 
 app.listen(PORT)
 console.log(`app listens to ${PORT}`)
