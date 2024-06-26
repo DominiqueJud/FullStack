@@ -28,7 +28,7 @@ app.get("/api/persons", (request, response)=>{
     })
 })
 
-app.get("/api/persons/:id",(request,response)=>{
+app.get("/api/persons/:id",(request,response, next)=>{
     Person.findById(request.params.id)
     .then(person=>{
         if(person){
@@ -50,27 +50,19 @@ app.get("/info", (request, response)=>{
         ${date}</p>`)})
 })
 
-app.post("/api/persons", (request,response)=>{
+app.post("/api/persons", (request,response, next)=>{
     let body=request.body
-    if (!body){
-        return response.status(400).json("content missing")
-    }
-    if(!body.name){
-        return response.status(400).json({error:"name missing in the request"})
-    }
-    if(!body.number){
-        return response.status(400).json({error:"number missing in the request"})
-    }
     const person=new Person({
         name: body.name,
         number: body.number
     })
     console.log(person, "addet to the server")
-    person.save().
-    then(result=>{
+    person.save()
+    .then(result=>{
         response.json(person)
         console.log(`${person} was sent to the Database`)
     })
+    .catch(error=>next(error))
 })
 
 app.delete("/api/persons/:id", (request,response, next)=>{
@@ -82,12 +74,8 @@ app.delete("/api/persons/:id", (request,response, next)=>{
 })
 
 app.put("/api/persons/:id", (request,response,next)=>{
-    const body=request.body
-    const person={
-        name:body.name,
-        number:body.number,
-    }
-    Person.findByIdAndUpdate(request.params.id,person,{new:true})
+    const {name,number}=request.body
+    Person.findByIdAndUpdate(request.params.id,{name,number},{new:true,runValidators:true,context:"query"})
     .then(updatedPerson=>{
         response.json(updatedPerson)
     })
@@ -101,18 +89,21 @@ const unknownEndpoint=(request, response)=>{
 app.use(unknownEndpoint)
 
 
-const errorHandler=(error,response,request,next)=>{
+const errorHandler=(error,request,response,next)=>{
     console.log(error.message)
     if(error.name==="CastError"){
         return response.status(400).send({error:"malformatted id"})
     }
+    else if(error.name==="ValidationError"){
+        return response.status(400).send({error:error.message})
+    }
     next(error)
 }
 
-app.use(errorHandler)
+
 const Person=require("./modules/person.js")
 
-
+app.use(errorHandler)
 const PORT= process.env.PORT||3001 
 app.listen(PORT)
 console.log(`app listens to ${PORT}`)

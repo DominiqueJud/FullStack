@@ -2,8 +2,20 @@ const MONGODB_URL=process.env.MONGODB_URL
 const mongoose=require("mongoose")
 
 personSchema=mongoose.Schema({
-    name:String,
-    number:String,
+    name:{type:String,
+        minLength: 3,
+        required:true,
+    },
+    number:{type:String,
+        minLength:8,
+        validate:{
+            validator:(value)=>{
+                return /^\d{2,3}[-]d*/.test(value)
+            },
+            message: props => `${props.value} is not a valid phone number!`
+        },
+        required:[true,"User phone Number required"],
+    },
 })
 
 personSchema.set("toJSON",{

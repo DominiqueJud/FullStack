@@ -62,9 +62,7 @@ const Notification = ({ message }) => {
 const App = () => {
 
 
-  const [persons, setPersons] = useState([
-    { name: 'Dominique Jud', number: "0786930657" },
-  {name:"dimitri",number:"1234"}])
+  const [persons, setPersons] = useState([])
 
   const [newName, setNewName] = useState('')
 
@@ -108,6 +106,11 @@ const App = () => {
             setMessage([`${person.name} number updated`,"green"])
             setTimeout(()=>setMessage(null),5000)
           })
+          .catch(error=>{
+            console.log(error.response.data.error)
+            setMessage([error.response.data.error,"red"])
+            setTimeout(()=>setMessage(null),5000)
+          })
       }
     }
     else {
@@ -118,7 +121,11 @@ const App = () => {
         .then(response => {
           console.log(response, "new Entry created")
           setActions(actions + 1)
-          setMessage([`${newPerson.name} addet to the Phonebook`],"red")
+          setMessage([`${newPerson.name} addet to the Phonebook`,"red"])
+          setTimeout(()=>setMessage(null),5000)
+        })
+        .catch(error=>{console.log(error.response.data.error)
+          setMessage([`${error.response.data.error}`,"red"])
           setTimeout(()=>setMessage(null),5000)
         })
     }
