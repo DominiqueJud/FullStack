@@ -1,8 +1,12 @@
+require("dotenv").config()
 const express=require("express")
 const app=express()
 const morgan=require("morgan")
 app.use(express.json())
 app.use(express.static("dist"))
+
+
+const Person=require("./modules/person.js")
 
 
 morgan.token("reqData",(req,res)=>{
@@ -43,12 +47,15 @@ app.get("/", (request, response)=>{
 })
 
 app.get("/api/persons", (request, response)=>{
-    response.json(persons)
+    Person.find({})
+    .then(result=>{
+        response.json(result)
+    })
 })
 
 app.get("/api/persons/:id",(request,response)=>{
     const id= Number(request.params.id)
-    const person=persons.find(person=> person.id==id)
+    const person=Person.find(person=> person.id===id)
     console.log(person, id)
     if(person){
         response.json(person)
@@ -79,18 +86,16 @@ app.post("/api/persons", (request,response)=>{
     if(!body.number){
         return response.status(400).json({error:"number missing in the request"})
     }
-    const personWithSameName=persons.find(person=> person.name===body.name)
-    if(personWithSameName){
-        return response.status(400).json({error:"person with the same name is already in the Phonebook"})
-    }
-    const person={
-        "id":Math.trunc(Math.random()*99999),
-        "name": body.name,
-        "number": body.number
-    }
-    persons=persons.concat(person)
+    const person=new Person({
+        name: body.name,
+        number: body.number
+    })
     console.log(person, "addet to the server")
-    response.json(person)
+    person.save().
+    then(result=>{
+        response.json(person)
+        console.log(`${person} was sent to the Database`)
+    })
 })
 
 app.delete("/api/persons/:id", (request,response)=>{
