@@ -36,6 +36,7 @@ mongoose.connect(MONGODB_URL)
     console.log('connection to MongoDB established')
   })
   .catch(error => {
+    console.log(MONGODB_URL)
     console.log('error connectiong to MongoDB', error.message)
   })
 
