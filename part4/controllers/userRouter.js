@@ -31,9 +31,15 @@ userRouter.post('/',async (request, response) => {
     response.status(201).json(savedUser)
 })
 
+userRouter.post('/reset', async (request, response) => {
+    await User.deleteMany({})
+    response.status(201).send()
+})
+
 userRouter.delete('/all', async (request, response) => {
     await User.deleteMany({})
     response.status(201).send()
 })
+
 
 module.exports=userRouter
